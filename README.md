@@ -12,19 +12,24 @@ Laravel 10 / 11 / 12 adapter for [Talaria](https://www.newtalaria.com).
 PHP 8.1+ and Laravel 10, 11, or 12.
 
 ```bash
-composer require talaria/laravel
+composer require talaria/laravel:^3.0
 ```
 
-The published config defaults the DSN to `https://ingest.newtalaria.com`. Set the API key:
+Upgrading from 2.x? 3.0 is a breaking release: `tal_live_` keys and `TALARIA_DSN` are gone. Use a `tal_sk_` key, and set `TALARIA_URL` only to override the host. See the [CHANGELOG](CHANGELOG.md). Update a published `config/talaria.php`: `dsn` and `browser_dsn` are now `url`, and `browser_api_key` must be a `tal_pk_` key.
+
+Set a secret key. Leave `TALARIA_URL` empty to use `https://ingest-<cell>.newtalaria.com` from that key:
 
 ```env
-TALARIA_API_KEY=tal_live_…
+TALARIA_API_KEY=tal_sk_prod_nz1_…
+TALARIA_BROWSER_API_KEY=tal_pk_prod_nz1_…
 TALARIA_RELEASE=1.4.2
 ```
 
-The API key decides the environment. Do not call `Talaria::init()` yourself. Tracing and analytics follow Project settings.
+`TALARIA_RELEASE` is optional. In GitHub Actions or GitLab the SDK sends `<ref>@<shortsha>` when it is unset. See [Releases](https://www.newtalaria.com/docs/guides/releases).
 
-HTML responses on the `web` middleware group load `@newtalaria/browser` from jsDelivr (`TALARIA_BROWSER_SDK_VERSION`, default `0.5.3`). Replay, heatmaps, and web vitals start only when the project allows them. Set `TALARIA_BROWSER=false` to skip the script. `TALARIA_BROWSER_DSN` and `TALARIA_BROWSER_API_KEY` override the PHP DSN and key for the browser only.
+Do not call `Talaria::init()` yourself. Tracing and analytics follow Project settings. A malformed key fails fast. An empty key leaves the client disabled.
+
+HTML responses on the `web` middleware group load `@newtalaria/browser` from jsDelivr (`TALARIA_BROWSER_SDK_VERSION`, default `0.5.3`). Replay, heatmaps, and web vitals start only when the project allows them. Set `TALARIA_BROWSER=false` to skip the script. The injected key is `browser_api_key` (`TALARIA_BROWSER_API_KEY`) and must be a `tal_pk_` key. The server `tal_sk_` key is not injected.
 
 ## License
 
